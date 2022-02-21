@@ -2,6 +2,8 @@
 
 pragma solidity ^0.8.10;
 
+error NotOwner();
+
 /**
  * @title Ownable
  * @dev Handles contract ownership
@@ -28,7 +30,7 @@ contract Ownable {
     // modifiers
 
     modifier isOwner() {
-        require(msg.sender == owner, "Caller is not owner");
+        if (msg.sender != owner) revert NotOwner();
         _;
     }
 

@@ -9,6 +9,11 @@ import "./Ownable.sol";
 import {StringUtils} from "./libraries/StringUtils.sol";
 import {Base64} from "./libraries/Base64.sol";
 
+error AlreadyRegistered();
+error NotEnoughMaticPaid();
+error Unathorized();
+error WithdrawalFailed();
+
 contract Domains is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -43,9 +48,8 @@ contract Domains is ERC721URIStorage, Ownable {
     }
 
     function register(string calldata name) public payable {
-        require(domains[name] == address(0), "Domain already registered");
-
-        require(msg.value >= price, "Not enough Matic paid");
+        if (domains[name] != address(0)) revert AlreadyRegistered();
+        if (msg.value < price) revert NotEnoughMaticPaid();
 
         string memory _name = string(abi.encodePacked(name, ".", tld));
 
@@ -99,10 +103,8 @@ contract Domains is ERC721URIStorage, Ownable {
     }
 
     function setRecord(string calldata name, Record calldata record) public {
-        require(
-            domains[name] == msg.sender,
-            "Only the domain owner can set its record"
-        );
+        if (domains[name] != msg.sender) revert Unathorized();
+
         records[name] = record;
     }
 
@@ -118,7 +120,7 @@ contract Domains is ERC721URIStorage, Ownable {
         uint256 amount = address(this).balance;
 
         (bool success, ) = msg.sender.call{value: amount}("");
-        require(success, "Failed to withdraw Matic");
+        if (!success) revert WithdrawalFailed();
     }
 
     function getAllNames() public view returns (string[] memory) {
