@@ -1,23 +1,33 @@
 const main = async () => {
-  // The first return is the deployer, the second is a random account
-  const [owner, user1] = await hre.ethers.getSigners();
+  const [owner] = await hre.ethers.getSigners();
   const domainContractFactory = await hre.ethers.getContractFactory("Domains");
-  const domainContract = await domainContractFactory.deploy();
+  // We pass in "D_D" to the constructor when deploying
+  // along with the domain price
+  const domainContract = await domainContractFactory.deploy(
+    "D_D",
+    hre.ethers.utils.parseEther("0.01")
+  );
   await domainContract.deployed();
 
   console.log("Contract deployed to:", domainContract.address);
   console.log("Contract deployed by:", owner.address);
 
-  const txn = await domainContract.register("dev#1");
+  // We're passing in a second variable - value. This is the moneyyyyyyyyyy
+  let txn = await domainContract.register("dev#1", {
+    value: hre.ethers.utils.parseEther("0.01"),
+  });
   await txn.wait();
 
   const domainOwner = await domainContract.getAddress("dev#1");
   console.log("Owner of domain (dev#1):", domainOwner);
 
-  // Trying to set a record that doesn't belong to me!
-  const txn2 = await domainContract
-    .connect(user1)
-    .setRecord("dev#1", { twitter: "@fakeDev1", discord: "fakeDev1#123" });
+  const balance = await hre.ethers.provider.getBalance(domainContract.address);
+  console.log("Contract balance:", hre.ethers.utils.formatEther(balance));
+
+  const txn2 = await domainContract.setRecord("dev#1", {
+    twitter: "@realDev1",
+    discord: "realDev1#123",
+  });
   await txn2.wait();
 
   const record = await domainContract.getRecord("dev#1");

@@ -4,23 +4,29 @@ pragma solidity ^0.8.10;
 import "hardhat/console.sol";
 
 contract Domains {
+    string public tld;
+    uint256 public price;
+
     mapping(string => address) public domains;
 
-    // Checkout our new mapping! This will store values
     struct Record {
         string twitter;
         string discord;
     }
-
     mapping(string => Record) public records;
 
-    constructor() {
-        console.log("Yo yo, I am a contract and I am smart");
+    constructor(string memory _tld, uint256 _price) {
+        tld = _tld;
+        price = _price;
+        console.log("%s name service deployed", _tld);
     }
 
-    function register(string calldata name) public {
-        // Check that the name is unregistered (explained in notes)
+    function register(string calldata name) public payable {
         require(domains[name] == address(0), "Domain already registered");
+
+        // Check if enough Matic was paid in the transaction
+        require(msg.value >= price, "Not enough Matic paid");
+
         domains[name] = msg.sender;
         console.log("%s has registered a domain!", msg.sender);
     }
