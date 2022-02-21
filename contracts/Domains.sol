@@ -22,6 +22,7 @@ contract Domains is ERC721URIStorage, Ownable {
     string svgPartTwo = "</text></svg>";
 
     mapping(string => address) public domains;
+    mapping(uint256 => string) public names;
 
     struct Record {
         string twitter;
@@ -89,6 +90,7 @@ contract Domains is ERC721URIStorage, Ownable {
         _setTokenURI(newTokenId, finalTokenUri);
         domains[name] = msg.sender;
 
+        names[newTokenId] = name;
         _tokenIds.increment();
     }
 
@@ -117,5 +119,13 @@ contract Domains is ERC721URIStorage, Ownable {
 
         (bool success, ) = msg.sender.call{value: amount}("");
         require(success, "Failed to withdraw Matic");
+    }
+
+    function getAllNames() public view returns (string[] memory) {
+        string[] memory allNames = new string[](_tokenIds.current());
+        for (uint256 i = 0; i < _tokenIds.current(); i++) {
+            allNames[i] = names[i];
+        }
+        return allNames;
     }
 }

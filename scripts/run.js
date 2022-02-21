@@ -71,6 +71,16 @@ const main = async () => {
     "Contract balance after withdrawal:",
     hre.ethers.utils.formatEther(newContractBalance)
   );
+
+  // register another
+  const txn5 = await domainContract.register("dev#5", {
+    value: hre.ethers.utils.parseEther("0.01"),
+  });
+  await txn5.wait();
+
+  // getAllNames
+  const allNames = await domainContract.getAllNames();
+  console.log("All names", allNames);
 };
 
 const runMain = async () => {
