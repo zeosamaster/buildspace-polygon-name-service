@@ -4,6 +4,8 @@ const main = async () => {
   // We pass in "D_D" to the constructor when deploying
   // along with the domain price
   const domainContract = await domainContractFactory.deploy(
+    "Developer DAO Name Service",
+    "DDNS",
     "D_D",
     hre.ethers.utils.parseEther("0.01")
   );
